@@ -98,7 +98,7 @@ plt.savefig('No of Datapoints per Activity.pdf')
 
 
 ##Stationary and Moving activities are completely different
-##merge maggnitutes of acceleration to plot activity's behaviours
+##merge magnitutes of acceleration to plot activity's behaviours
 act_behaviours= pd.merge(train_labels,train_ts, on='timestamp')
 
 sns.set_palette("Set1", desat=0.80)
