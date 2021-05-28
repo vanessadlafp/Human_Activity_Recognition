@@ -1,66 +1,82 @@
-# HarvardX PH526x- Using Python for Research 
-## Capstone Project: Project Overview
+# Project Overview
 
-* Created a tool that XXX  (ERROR ~ $ 11K) to XXX.
-* Engineered features from XXX on python, excel, aws, and spark.
-* Optimized (Linear, Lasso, and Random Forest==BUSCAR EQUIVALENTES PARA CLASSIFICATION) Regressors using GridsearchCV(VER SI SIRVE PARA CLASSIFIERS) to reach the best model.
+This is the capstone project for the HarvardX PH526x- Using Python for Research course.
+
+* Created a tool that predicts the type of physical activity (e.g., walking, climbing stairs) from tri-axial smartphone accelerometer data with a  precision of  93.74%.  (ERROR ~ 0.1618 degrees).
+* Engineered features from time series signals on python.
+* Optimized (Logistic, Gradient Boosting, Random Forest, Nearest Neighbors and Decision Tree) classifiers using GridsearchCV to reach the best model and train time. 
 * Built a client facing API using flask
-
-## Project Instructions:
-#### Introduction
-
-In this final project,we'll attempt to predict the type of physical activity (e.g., walking, climbing stairs) from tri-axial smartphone accelerometer data. Smartphone accelerometers are very precise, and different physical activities give rise to different patterns of acceleration.
-
-#### Input Data
-The input data used for training in this project consists of two files. The first file, train_time_series.csv
-, contains the raw accelerometer data, which has been collected using the Beiwe research platform, and it has the following format:
-timestamp, UTC time, accuracy, x, y, z
-You can use the timestamp column as your time variable; you'll also need the last three columns, here labeled x
-, y
-, and z
-, which correspond to measurements of linear acceleration along each of the three orthogonal axes.
-
-The second file, train_labels.csv
-, contains the activity labels, and you'll be using these labels to train your model. Different activities have been numbered with integers. We use the following encoding: 1 = standing, 2 = walking, 3 = stairs down, 4 = stairs up. Because the accelerometers are sampled at high frequency, the labels in train_labels.csv
- are only provided for every 10th observation in train_time_series.csv
-.
-
-#### Activity Classification
-
-Your goal is to classify different physical activities as accurately as possible. To test your code, you're also provided a file called test_time_series.csv
-, and at the end of the project you're asked to provide the activity labels predicted by your code for this test data set. Note that in both cases, for training and testing, the input file consists of a single (3-dimensional) time series. To test the accuracy of your code, you'll be asked to upload your predictions as a CSV file. This file called test_labels.csv is provided to you, but it only contains the time stamps needed for prediction; you'll need to augment this file by adding the corresponding class predictions (1,2,3,4).
 
 ## Code and Resources Used
 Python Version: 3.7
-Packages: pandas, numpy, sklearn, matplotlib, seaborn, flask, json, pickle
-For Web Framework Requirements: pip install -r requirements.txt
-X Github: 
-X Article: 
-Flask Productionization: https://towardsdatascience.com/productionize-a-machine-learning-model-with-flask-and-heroku-8201260503d2
+Packages: pandas, numpy, sklearn, matplotlib, seaborn, flask, json, pickle, siml, detecta, imblearn, pprint, collections.
 
-## EDA
-(CAMBIAR PERO MODELO)
-I looked at the distributions of the data and the value counts for the various categorical variables. Below are a few highlights from the pivot tables.)
+* [Machine Learning with Signal Processing Techniques Github](https://github.com/akhuperkar/HAR-Smartphone-Accelerometer)
+* [Machine Learning with Signal Processing Techniques Article](https://ataspinar.com/2018/04/04/machine-learning-with-signal-processing-techniques/)
+* [Flask Productionization](https://towardsdatascience.com/productionize-a-machine-learning-model-with-flask-and-heroku-8201260503d2) 
+* [Flask Tutorial](https://www.youtube.com/watch?v=nUOh_lDMHOU&t=1740s)
 
-## Model Building
-(CAMBIAR PERO MODELO)
-First, I transformed the categorical variables into dummy variables. I also split the data into train and tests sets with a test size of 20%.
+## Dataset
+The input data used for training in this project consists of two files. The first file, train_time_series.csv, contains the raw accelerometer data, which has been collected using the [Beiwe research platform](https://www.hsph.harvard.edu/onnela-lab/beiwe-research-platform/), and it has the following format: timestamp, UTC time, accuracy, and measurements of linear acceleration along each of the three orthogonal axes x, y, z.
 
-I tried three different models and evaluated them using Mean Absolute Error. I chose MAE because it is relatively easy to interpret and outliers aren’t particularly bad in for this type of model.
+The second file, train_labels.csv, contains the activity labels  numbered with integers:
+* 1 = standing
+* 2 = walking
+* 3 = stairs down
+* 4 = stairs up
 
-I tried three different models:
+Because the accelerometers are sampled at high frequency, the labels in train_labels.csv are only provided for every 10th observation in train_time_series.csv
 
-Multiple Linear Regression – Baseline for the model
-Lasso Regression – Because of the sparse data from the many categorical variables, I thought a normalized regression like lasso would be effective.
-Random Forest – Again, with the sparsity associated with the data, I thought that this would be a good fit.
+![](https://github.com/vanessadlafp/HarvardX_PH526x/blob/master/Images/time-series.png)
 
-## Model performance
-The Random Forest model far outperformed the other approaches on the test and validation sets.
+## Analysis
 
-Random Forest : MAE = 11.22
-Linear Regression: MAE = 18.86
-Ridge Regression: MAE = 19.67
+### Check for Imbalanced class
+![](https://github.com/vanessadlafp/HarvardX_PH526x/blob/master/Images/class_imbalance.png)
+
+The data isn't well balanced, having considerably more data points for walking (2) activity, followed by stairs down (3). This might be related with the lifestyle of the subjects of study, however, should be considered when builiding the model to avoid any bias towards the more dominant classes. 
+
+### Variable analysis
+
+* Moving and stationnary activities behave diferently, where the magnitude of of linear acceleration of the latter remains in ranges lower than those of stationary activities.
+
+![](https://github.com/vanessadlafp/HarvardX_PH526x/blob/master/Images/moving_vs_stationnary.png)
+
+![](https://github.com/vanessadlafp/HarvardX_PH526x/blob/master/Images/moving_vs_stationnary_zoomed_in.png)
+
+* Mean of magnitude of acceleration:
+
+![](https://github.com/vanessadlafp/HarvardX_PH526x/blob/master/Images/acceleration_per_component.png)
+
+## Featurization
+
+* Calculation of the magnitude of each vector from its components using the using the Pythagorean Theorem, included to dataset as column "m".
+* Parsing of 'UTC Time' column from string to timestamp.
+* Sampling of time and frequency for time series signals and labels.
+* Applied Frequency Transformation Functions (Fast Fourier Transform (FFT), Power Spectral Density (PSD) and Auto-correlation) to transform the signals from the time-domain to  the frequency-domain and extract features from them (frequencies at which oscillations occur and their corresponding amplitudes).  Following along with Ahmet Taspinar article referenced above. 
+
+
+![](https://github.com/vanessadlafp/HarvardX_PH526x/blob/master/Images/feature_extraction.png) 
+
+## Resampling for class imbalance
+
+Considering that the most dominant class contains over 50% of the total data, Imbalanced-learn's Oversample Adaptive Synthetic (ADASYN) algorith was used.
+
+This algorithm generates different number of samples depending on an estimate of the local distribution of the class to be oversampled.
+
+* Original dataset shape Counter({2: 213, 3: 88, 4: 47, 1: 27})
+* Resampled dataset shape Counter({3: 231, 2: 213, 1: 212, 4: 209})
+
+## Models
+
+* Split the train data into train and validation sets with a validation size of 20%
+* Scikit-learn is used for all the 5 algorithms listed below to select the best one for hyperparameter tuning, taking into condideration the train time:
+
+![](https://github.com/vanessadlafp/HarvardX_PH526x/blob/master/Images/models_table.png)
+
+Hyperparameters of Random Forest model are tuned by grid search CV, even though it was the second best performer, it was able to achieve a high accuracy on the validation data in considerably less time than the Gradient Boost algorithm. 
+
 
 ## Productionization
 
-In this step, I built a flask API endpoint that was hosted on a local webserver by following along with the TDS tutorial in the reference section above. The API endpoint takes in a request with a list of values from a job listing and returns an estimated salary.
+Building of Flask API endpoint that was hosted on a local webserver by following along with the TDS and Ken Jee's tutorials, referenced in the section above. The API endpoint takes in a request with a vector with frequency and amplitude features (taken from the components x,y,z and magnitude of measurements of linear acceleration) and predicts the type of physical activity (e.g., walking, climbing stairs).
